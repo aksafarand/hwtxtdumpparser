@@ -27,6 +27,7 @@ func printInfo() {
 }
 
 var resultDir = "_dumpresult"
+var outputDir = "_dumpoutput"
 
 type Table struct {
 	Name      string
@@ -39,6 +40,7 @@ type Table struct {
 func main() {
 	printInfo()
 	flagPtr := flag.String("path", "", "Source Path")
+	flagOtr := flag.String("out", "", "Output Path")
 	flagAccess := flag.Bool("access", false, "Is Export To Access")
 	flagTech := flag.String("tech", "", "Technology 2g/3g")
 	flagSkippedComment := flag.Bool("skip-comment", true, "Skipped // Lines")
@@ -47,9 +49,10 @@ func main() {
 	isAccess := *flagAccess
 	techName := *flagTech
 	skipDoubleSlash := *flagSkippedComment
+	outputPath := *flagOtr
 
-	if pathName == "" {
-		log.Fatalf("No Source Path Provided")
+	if pathName == "" || outputPath == "" {
+		log.Fatalf("No Source Path / Output Path Provided")
 	}
 
 	if techName == "" {
@@ -59,6 +62,10 @@ func main() {
 	pathName = strings.Replace(pathName, `\`, `/`, -1)
 
 	if err := os.MkdirAll(resultDir, 0666); err != nil {
+		panic(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(outputPath, outputDir), 0666); err != nil {
 		panic(err)
 	}
 
@@ -75,13 +82,13 @@ func main() {
 			return
 		}
 
-		err = ioutil.WriteFile(`./`+techName+`_CFGMML.accdb`, input, 0644)
+		err = ioutil.WriteFile(filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb"), input, 0644)
 		if err != nil {
-			log.Println("Error creating", `./`+techName+`_CFGMML.accdb`)
+			log.Println("Error creating", filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb"))
 			log.Println(err)
 			return
 		}
-		dbName = `./` + techName + `_CFGMML.accdb`
+		dbName = filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb")
 	}
 
 	if strings.ToLower(techName) == "3g" && isAccess {
@@ -91,13 +98,13 @@ func main() {
 			return
 		}
 
-		err = ioutil.WriteFile(`./`+techName+`_CFGMML.accdb`, input, 0644)
+		err = ioutil.WriteFile(filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb"), input, 0644)
 		if err != nil {
-			log.Println("Error creating", `./`+techName+`_CFGMML.accdb`)
+			log.Println("Error creating", filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb"))
 			log.Println(err)
 			return
 		}
-		dbName = `./` + techName + `_CFGMML.accdb`
+		dbName = filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb")
 	}
 
 	if strings.ToLower(techName) == "2g" {
@@ -174,7 +181,9 @@ func main() {
 		log.Println("Done")
 		log.Println("Total Elapsed In", time.Since(timeStartTotal))
 	}
-
+	if err := os.RemoveAll(resultDir); err != nil {
+		panic(err)
+	}
 }
 
 func MakeNewTable(name string) (*Table, error) {
