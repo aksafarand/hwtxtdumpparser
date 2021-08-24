@@ -41,7 +41,7 @@ func main() {
 	printInfo()
 	flagPtr := flag.String("path", "", "Source Path")
 	flagOtr := flag.String("out", "", "Output Path")
-	flagAccess := flag.Bool("access", false, "Is Export To Access")
+	flagAccess := flag.Bool("access", true, "Is Export To Access")
 	flagTech := flag.String("tech", "", "Technology 2g/3g")
 	flagSkippedComment := flag.Bool("skip-comment", true, "Skipped // Lines")
 	flag.Parse()
@@ -50,6 +50,10 @@ func main() {
 	techName := *flagTech
 	skipDoubleSlash := *flagSkippedComment
 	outputPath := *flagOtr
+
+	if _, err := os.Stat("./EMPTY.accdb"); os.IsNotExist(err) {
+		log.Fatalf("No 'EMPTY.accdb' Found")
+	}
 
 	if pathName == "" || outputPath == "" {
 		log.Fatalf("No Source Path / Output Path Provided")
@@ -142,6 +146,7 @@ func main() {
 		}
 		fmt.Println("--------------------------------------------------------")
 		log.Println("Total Elapsed In", time.Since(timeStartTotal))
+		log.Println("Output File In", filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb"))
 		fmt.Println("--------------------------------------------------------")
 	}
 
@@ -178,8 +183,11 @@ func main() {
 			log.Println("Elapsed In", time.Since(timeStart))
 			timeStart = time.Now()
 		}
-		log.Println("Done")
+
+		fmt.Println("--------------------------------------------------------")
 		log.Println("Total Elapsed In", time.Since(timeStartTotal))
+		log.Println("Output File In", filepath.Join(outputPath, outputDir, techName+"_CFGMML.accdb"))
+		fmt.Println("--------------------------------------------------------")
 	}
 	if err := os.RemoveAll(resultDir); err != nil {
 		panic(err)
