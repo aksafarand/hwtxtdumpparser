@@ -70,11 +70,6 @@ func main() {
 		panic(err)
 	}
 
-	// files, err := ioutil.ReadDir(pathName)
-	// if err != nil {
-	// 	log.Fatalf(`Error %s`, err.Error())
-	// }
-
 	dbName := ""
 	if strings.ToLower(techName) == "2g" && isAccess {
 		input, err := ioutil.ReadFile(`./EMPTY.accdb`)
